@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}My Tasks — TaskFlow AI{% endblock %}
+{% block page_title %}My Tasks{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2 class="page-heading">My Tasks</h2>
+  <a href="{{ url_for('create_task') }}" class="btn-primary-custom">
+    <i class="bi bi-plus-lg"></i> New Task
+  </a>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('tasks') }}" class="filter-form">
+    <div class="search-wrap">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" name="search" class="search-input" placeholder="Search tasks…" value="{{ search }}">
+    </div>
+
+    <select name="priority" class="filter-select">
+      <option value="">All Priorities</option>
+      <option value="High"   {% if priority=='High' %}selected{% endif %}>🔴 High</option>
+      <option value="Medium" {% if priority=='Medium' %}selected{% endif %}>🟡 Medium</option>
+      <option value="Low"    {% if priority=='Low' %}selected{% endif %}>🟢 Low</option>
+    </select>
+
+    <select name="status" class="filter-select">
+      <option value="">All Statuses</option>
+      <option value="Pending"   {% if status=='Pending' %}selected{% endif %}>Pending</option>
+      <option value="Completed" {% if status=='Completed' %}selected{% endif %}>Completed</option>
+    </select>
+
+    <input type="date" name="deadline" class="filter-select" value="{{ deadline }}" title="Filter by deadline">
+
+    <button type="submit" class="btn-filter">
+      <i class="bi bi-funnel-fill"></i> Filter
+    </button>
+    <a href="{{ url_for('tasks') }}" class="btn-filter-clear">
+      <i class="bi bi-x-lg"></i>
+    </a>
+  </form>
+</div>
+
+<!-- Task Table -->
+{% if tasks %}
+<div class="panel">
+  <div class="table-responsive">
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th style="width:40px"></th>
+          <th>Task</th>
+          <th>Priority</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr class="task-tr {% if task.status=='Completed' %}task-done{% endif %}">
+          <td>
+            <form method="POST" action="{{ url_for('complete_task', task_id=task.id) }}">
+              <button type="submit" class="task-check {% if task.status=='Completed' %}checked{% endif %}">
+                <i class="bi bi-check-lg"></i>
+              </button>
+            </form>
+          </td>
+          <td>
+            <a href="{{ url_for('task_detail', task_id=task.id) }}" class="task-title-link">{{ task.title }}</a>
+            {% if task.description %}
+              <div class="task-desc-preview">{{ task.description[:60] }}{% if task.description|length > 60 %}…{% endif %}</div>
+            {% endif %}
+          </td>
+          <td><span class="badge-priority priority-{{ task.priority|lower }}">{{ task.priority }}</span></td>
+          <td>
+            {% if task.deadline %}
+              <span class="task-date">{{ task.deadline }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td><span class="badge-status status-{{ task.status|lower|replace(' ','') }}">{{ task.status }}</span></td>
+          <td>
+            <div class="action-btns">
+              <a href="{{ url_for('task_detail', task_id=task.id) }}" class="action-btn" title="View"><i class="bi bi-eye-fill"></i></a>
+              <a href="{{ url_for('edit_task', task_id=task.id) }}" class="action-btn" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+              <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" onsubmit="return confirm('Delete this task?')">
+                <button type="submit" class="action-btn danger" title="Delete"><i class="bi bi-trash-fill"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav class="pagination-nav">
+  <ul class="pagination-list">
+    {% if page > 1 %}
+    <li><a href="?page={{ page-1 }}&search={{ search }}&priority={{ priority }}&status={{ status }}&deadline={{ deadline }}" class="page-btn"><i class="bi bi-chevron-left"></i></a></li>
+    {% endif %}
+    {% for p in range(1, total_pages+1) %}
+    <li>
+      <a href="?page={{ p }}&search={{ search }}&priority={{ priority }}&status={{ status }}&deadline={{ deadline }}"
+         class="page-btn {% if p==page %}active{% endif %}">{{ p }}</a>
+    </li>
+    {% endfor %}
+    {% if page < total_pages %}
+    <li><a href="?page={{ page+1 }}&search={{ search }}&priority={{ priority }}&status={{ status }}&deadline={{ deadline }}" class="page-btn"><i class="bi bi-chevron-right"></i></a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-page">
+  <div class="empty-icon"><i class="bi bi-clipboard-x"></i></div>
+  <h3>No tasks found</h3>
+  <p>{% if search or priority or status %}Try adjusting your filters.{% else %}Create your first task to get started.{% endif %}</p>
+  <a href="{{ url_for('create_task') }}" class="btn-primary-custom mt-3">
+    <i class="bi bi-plus-lg"></i> Create Task
+  </a>
+</div>
+{% endif %}
+{% endblock %}

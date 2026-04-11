@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ team.team_name }} Tasks — TaskFlow AI{% endblock %}
+{% block page_title %}Team Tasks{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-heading">{{ team.team_name }}</h2>
+    <p class="page-sub">Shared team tasks</p>
+  </div>
+  <a href="{{ url_for('teams') }}" class="btn-cancel">
+    <i class="bi bi-arrow-left me-1"></i> Back to Teams
+  </a>
+</div>
+
+{% if tasks %}
+<div class="panel">
+  <div class="table-responsive">
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Owner</th>
+          <th>Priority</th>
+          <th>Deadline</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr class="task-tr {% if task.status=='Completed' %}task-done{% endif %}">
+          <td>
+            <div class="task-title-link">{{ task.title }}</div>
+            {% if task.description %}
+              <div class="task-desc-preview">{{ task.description[:60] }}{% if task.description|length > 60 %}…{% endif %}</div>
+            {% endif %}
+          </td>
+          <td><span class="user-chip-sm"><i class="bi bi-person-fill me-1"></i>{{ task.owner_name }}</span></td>
+          <td><span class="badge-priority priority-{{ task.priority|lower }}">{{ task.priority }}</span></td>
+          <td>{{ task.deadline or '—' }}</td>
+          <td><span class="badge-status status-{{ task.status|lower|replace(' ','') }}">{{ task.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-page">
+  <div class="empty-icon"><i class="bi bi-clipboard-x"></i></div>
+  <h3>No tasks yet for this team</h3>
+  <p>Create a task and assign it to this team.</p>
+  <a href="{{ url_for('create_task') }}" class="btn-primary-custom mt-3">
+    <i class="bi bi-plus-lg"></i> Create Task
+  </a>
+</div>
+{% endif %}
+{% endblock %}

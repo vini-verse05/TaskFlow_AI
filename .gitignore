@@ -1,0 +1,96 @@
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+
+# ── Virtual Environments ──────────────────────────────────────
+venv/
+env/
+.env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ── Flask / App Specific ──────────────────────────────────────
+instance/
+.flaskenv
+*.db
+database.db
+
+# ── Environment Variables ─────────────────────────────────────
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# ── User Uploads ──────────────────────────────────────────────
+static/uploads/*
+!static/uploads/.gitkeep
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ── Distribution / Packaging ──────────────────────────────────
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ── Testing ───────────────────────────────────────────────────
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+htmlcov/
+.pytest_cache/
+nosetests.xml
+
+# ── IDEs & Editors ────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── OS Files ──────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# ── Jupyter Notebooks ─────────────────────────────────────────
+.ipynb_checkpoints
+*.ipynb
+
+# ── mypy / type checkers ──────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/

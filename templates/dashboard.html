@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — TaskFlow AI{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-heading">Good to see you, <span class="highlight">{{ session.username }}</span> 👋</h2>
+    <p class="page-sub">Here's what's happening with your tasks today.</p>
+  </div>
+  <a href="{{ url_for('create_task') }}" class="btn-primary-custom">
+    <i class="bi bi-plus-lg"></i> New Task
+  </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card stat-total">
+    <div class="stat-icon"><i class="bi bi-layers-fill"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ total }}</span>
+      <span class="stat-label">Total Tasks</span>
+    </div>
+    <div class="stat-bg-icon"><i class="bi bi-layers-fill"></i></div>
+  </div>
+
+  <div class="stat-card stat-completed">
+    <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ completed }}</span>
+      <span class="stat-label">Completed</span>
+    </div>
+    <div class="stat-bg-icon"><i class="bi bi-check-circle-fill"></i></div>
+  </div>
+
+  <div class="stat-card stat-pending">
+    <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ pending }}</span>
+      <span class="stat-label">Pending</span>
+    </div>
+    <div class="stat-bg-icon"><i class="bi bi-hourglass-split"></i></div>
+  </div>
+
+  <div class="stat-card stat-overdue">
+    <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ overdue }}</span>
+      <span class="stat-label">Overdue</span>
+    </div>
+    <div class="stat-bg-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+  </div>
+</div>
+
+<!-- Progress bar -->
+{% if total > 0 %}
+<div class="progress-section">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="progress-label">Overall Progress</span>
+    <span class="progress-pct">{{ ((completed / total) * 100)|round|int }}%</span>
+  </div>
+  <div class="custom-progress">
+    <div class="custom-progress-bar" style="width: {{ ((completed / total) * 100)|round|int }}%"></div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mt-1">
+  <!-- Recent Tasks -->
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title"><i class="bi bi-clock-history me-2"></i>Recent Tasks</h3>
+        <a href="{{ url_for('tasks') }}" class="panel-link">View all <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="panel-body">
+        {% if recent_tasks %}
+          <div class="task-list">
+            {% for task in recent_tasks %}
+            <div class="task-row">
+              <div class="task-row-left">
+                <form method="POST" action="{{ url_for('complete_task', task_id=task.id) }}" style="display:inline">
+                  <button type="submit" class="task-check {% if task.status=='Completed' %}checked{% endif %}" title="Mark complete">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                </form>
+                <div>
+                  <a href="{{ url_for('task_detail', task_id=task.id) }}" class="task-title-link {% if task.status=='Completed' %}done{% endif %}">
+                    {{ task.title }}
+                  </a>
+                  {% if task.deadline %}
+                    <span class="task-date"><i class="bi bi-calendar3 me-1"></i>{{ task.deadline }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="task-row-right">
+                <span class="badge-priority priority-{{ task.priority|lower }}">{{ task.priority }}</span>
+                <span class="badge-status status-{{ task.status|lower|replace(' ','') }}">{{ task.status }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>No tasks yet. <a href="{{ url_for('create_task') }}">Create your first task</a></p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Due Soon -->
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title"><i class="bi bi-alarm-fill me-2 text-warning"></i>Due Soon</h3>
+      </div>
+      <div class="panel-body">
+        {% if due_soon %}
+          {% for task in due_soon %}
+          <div class="alert-task">
+            <div class="alert-task-name">{{ task.title }}</div>
+            <div class="alert-task-date">
+              <i class="bi bi-calendar-event me-1"></i>{{ task.deadline }}
+            </div>
+            <span class="badge-priority priority-{{ task.priority|lower }}">{{ task.priority }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state small">
+            <i class="bi bi-check-all"></i>
+            <p>All clear! Nothing due soon.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="panel mt-4">
+      <div class="panel-header">
+        <h3 class="panel-title"><i class="bi bi-lightning-fill me-2"></i>Quick Actions</h3>
+      </div>
+      <div class="panel-body d-grid gap-2">
+        <a href="{{ url_for('create_task') }}" class="btn-action">
+          <i class="bi bi-plus-circle"></i> Create Task
+        </a>
+        <a href="{{ url_for('teams') }}" class="btn-action">
+          <i class="bi bi-people"></i> Manage Teams
+        </a>
+        <a href="{{ url_for('notifications') }}" class="btn-action">
+          <i class="bi bi-bell"></i> View Notifications
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

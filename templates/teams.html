@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Teams — TaskFlow AI{% endblock %}
+{% block page_title %}Teams{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2 class="page-heading">My Teams</h2>
+  <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+    <i class="bi bi-plus-lg"></i> New Team
+  </button>
+</div>
+
+{% if teams %}
+<div class="row g-4">
+  {% for team in teams %}
+  <div class="col-md-6 col-lg-4">
+    <div class="team-card">
+      <div class="team-card-header">
+        <div class="team-avatar">{{ team.team_name[0]|upper }}</div>
+        <div>
+          <div class="team-name">{{ team.team_name }}</div>
+          <div class="team-meta">by {{ team.creator_name }}</div>
+        </div>
+      </div>
+      <div class="team-stats">
+        <span><i class="bi bi-people-fill me-1"></i>{{ team.member_count }} members</span>
+        <span><i class="bi bi-calendar3 me-1"></i>{{ team.created_at[:10] if team.created_at else '' }}</span>
+      </div>
+      <div class="team-actions">
+        <a href="{{ url_for('team_tasks', team_id=team.id) }}" class="btn-team-action">
+          <i class="bi bi-list-task me-1"></i> View Tasks
+        </a>
+        <button class="btn-team-action" data-bs-toggle="modal" data-bs-target="#inviteModal{{ team.id }}">
+          <i class="bi bi-person-plus me-1"></i> Invite
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invite Modal -->
+  <div class="modal fade" id="inviteModal{{ team.id }}" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content modal-custom">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">Invite to {{ team.team_name }}</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="{{ url_for('invite_member', team_id=team.id) }}">
+            <div class="form-field">
+              <label class="form-label">Username</label>
+              <input type="text" name="username" class="input-field" placeholder="Enter username" required />
+            </div>
+            <button type="submit" class="btn-primary-custom w-100">
+              <i class="bi bi-send-fill me-1"></i> Send Invite
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-page">
+  <div class="empty-icon"><i class="bi bi-people"></i></div>
+  <h3>No teams yet</h3>
+  <p>Create a team to collaborate with others.</p>
+  <button class="btn-primary-custom mt-3" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+    <i class="bi bi-plus-lg"></i> Create Your First Team
+  </button>
+</div>
+{% endif %}
+
+<!-- Create Team Modal -->
+<div class="modal fade" id="createTeamModal" tabindex="-1">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content modal-custom">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">New Team</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('create_team') }}">
+          <div class="form-field">
+            <label class="form-label">Team Name</label>
+            <input type="text" name="team_name" class="input-field" placeholder="e.g. Design Squad" required />
+          </div>
+          <button type="submit" class="btn-primary-custom w-100">
+            <i class="bi bi-people-fill me-1"></i> Create Team
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

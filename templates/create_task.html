@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}New Task — TaskFlow AI{% endblock %}
+{% block page_title %}New Task{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-heading">Create New Task</h2>
+    <p class="page-sub">Fill in the details. Our AI will suggest priority & deadline.</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="panel-body">
+        <form method="POST" action="{{ url_for('create_task') }}" enctype="multipart/form-data" novalidate>
+
+          <div class="form-field">
+            <label class="form-label">Task Title <span class="req">*</span></label>
+            <input type="text" name="title" class="input-field" placeholder="e.g. Finish project report urgently" required />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Description</label>
+            <textarea name="description" id="taskDescription" class="input-field" rows="4"
+              placeholder="Describe the task… AI will analyse this for suggestions"></textarea>
+          </div>
+
+          <!-- AI Suggestion Banner -->
+          <div class="ai-banner" id="aiBanner" style="display:none">
+            <div class="ai-banner-icon"><i class="bi bi-stars"></i></div>
+            <div class="ai-banner-content">
+              <strong>AI Suggestion</strong>
+              <span id="aiSuggestionText"></span>
+            </div>
+            <button type="button" class="ai-apply-btn" id="aiApplyBtn" onclick="applyAISuggestion()">
+              Apply <i class="bi bi-check2"></i>
+            </button>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-field">
+                <label class="form-label">Priority</label>
+                <select name="priority" id="priorityField" class="input-field">
+                  <option value="Low">🟢 Low</option>
+                  <option value="Medium" selected>🟡 Medium</option>
+                  <option value="High">🔴 High</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-field">
+                <label class="form-label">Deadline</label>
+                <input type="date" name="deadline" id="deadlineField" class="input-field" />
+              </div>
+            </div>
+          </div>
+
+          {% if teams %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-field">
+                <label class="form-label">Assign to Team</label>
+                <select name="team_id" class="input-field">
+                  <option value="">— Personal Task —</option>
+                  {% for team in teams %}
+                  <option value="{{ team.id }}">{{ team.team_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="form-field">
+            <label class="form-label">Attachment <span class="form-hint">(optional, max 16 MB)</span></label>
+            <div class="file-drop-zone" id="dropZone">
+              <i class="bi bi-cloud-upload-fill"></i>
+              <p>Drag & drop or <span class="link">browse</span></p>
+              <small>PNG, JPG, PDF, DOCX, ZIP supported</small>
+              <input type="file" name="attachment" id="fileInput" class="file-input" accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx,.txt,.zip" />
+            </div>
+            <div id="filePreview" class="file-preview" style="display:none"></div>
+          </div>
+
+          <div class="form-actions">
+            <a href="{{ url_for('tasks') }}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-primary-custom">
+              <i class="bi bi-plus-circle-fill me-2"></i> Create Task
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let aiData = {};
+
+// Debounce AI suggestions while typing description
+const descField = document.getElementById('taskDescription');
+let debounceTimer;
+descField.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(fetchAISuggestion, 600);
+});
+
+async function fetchAISuggestion() {
+  const text = descField.value.trim();
+  if (text.length < 10) {
+    document.getElementById('aiBanner').style.display = 'none';
+    return;
+  }
+  try {
+    const res = await fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    aiData = await res.json();
+    const parts = [`Priority → <strong>${aiData.priority}</strong>`];
+    if (aiData.deadline) parts.push(`Deadline → <strong>${aiData.deadline}</strong>`);
+    document.getElementById('aiSuggestionText').innerHTML = parts.join(' &nbsp;|&nbsp; ');
+    document.getElementById('aiBanner').style.display = 'flex';
+  } catch (e) { console.error(e); }
+}
+
+function applyAISuggestion() {
+  if (aiData.priority) {
+    document.getElementById('priorityField').value = aiData.priority;
+  }
+  if (aiData.deadline) {
+    document.getElementById('deadlineField').value = aiData.deadline;
+  }
+  document.getElementById('aiBanner').style.display = 'none';
+  showToast('AI suggestions applied!');
+}
+
+// File drop zone
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  fileInput.files = e.dataTransfer.files;
+  showFilePreview(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) showFilePreview(fileInput.files[0]);
+});
+function showFilePreview(file) {
+  const preview = document.getElementById('filePreview');
+  preview.style.display = 'flex';
+  preview.innerHTML = `<i class="bi bi-paperclip me-2"></i><span>${file.name}</span><span class="ms-auto text-muted">${(file.size/1024).toFixed(1)} KB</span>`;
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast-msg';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+</script>
+{% endblock %}

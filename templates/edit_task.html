@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Edit Task — TaskFlow AI{% endblock %}
+{% block page_title %}Edit Task{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2 class="page-heading">Edit Task</h2>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="panel-body">
+        <form method="POST" action="{{ url_for('edit_task', task_id=task.id) }}" novalidate>
+
+          <div class="form-field">
+            <label class="form-label">Task Title <span class="req">*</span></label>
+            <input type="text" name="title" class="input-field" value="{{ task.title }}" required />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="input-field" rows="4">{{ task.description or '' }}</textarea>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="form-field">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="input-field">
+                  <option value="Low"    {% if task.priority=='Low' %}selected{% endif %}>🟢 Low</option>
+                  <option value="Medium" {% if task.priority=='Medium' %}selected{% endif %}>🟡 Medium</option>
+                  <option value="High"   {% if task.priority=='High' %}selected{% endif %}>🔴 High</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-field">
+                <label class="form-label">Status</label>
+                <select name="status" class="input-field">
+                  <option value="Pending"   {% if task.status=='Pending' %}selected{% endif %}>Pending</option>
+                  <option value="Completed" {% if task.status=='Completed' %}selected{% endif %}>Completed</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-field">
+                <label class="form-label">Deadline</label>
+                <input type="date" name="deadline" class="input-field" value="{{ task.deadline or '' }}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="{{ url_for('tasks') }}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-primary-custom">
+              <i class="bi bi-save2-fill me-2"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
