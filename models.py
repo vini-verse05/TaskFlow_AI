@@ -103,3 +103,7 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+if not os.path.exists("database.db"):
+    init_db()
+    
