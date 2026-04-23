@@ -7,6 +7,9 @@ import sqlite3
 import os
 from werkzeug.security import generate_password_hash
 
+if not os.path.exists("database.db"):
+    init_db()
+    
 DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 
 
