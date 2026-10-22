@@ -1,51 +1,42 @@
-# ⚡ TaskFlow AI — Smart Task Manager with Team Collaboration
+# ⚡ TaskFlow AI – Smart Task Manager
 
-> **Resume-ready, full-stack web application** built with Python Flask, SQLite, Bootstrap 5, and an AI-powered smart suggestion engine.
+TaskFlow AI is a task management web application I built using Python Flask, SQLite, and Bootstrap. The idea was to create a simple place to manage personal tasks, keep track of deadlines, and collaborate with team members.
 
----
-
-## 📸 Screenshots
-
-> Login, Dashboard, Task Management, Team Collaboration, Notifications pages with a modern dark UI and cyan accent color scheme.
-
----
+It also includes a small rule-based suggestion system that recommends task priorities and deadlines based on the description entered by the user.
 
 ## ✨ Features
 
-| Feature | Description |
+- **User Authentication:** Register, log in, and log out with password hashing.
+- **Dashboard:** View task statistics, including completed, pending, and overdue tasks.
+- **Task Management:** Create, edit, view, and delete tasks with priorities and deadlines.
+- **Smart Suggestions:** Get priority and deadline suggestions based on keywords in the task description.
+- **Team Collaboration:** Create teams, work with team members, and view shared tasks.
+- **Notifications:** Get alerts for overdue tasks and tasks approaching their deadlines.
+- **File Attachments:** Upload supported files and attach them to tasks.
+- **Search and Filters:** Find tasks by keyword, priority, status, or deadline.
+- **Pagination:** Browse tasks in smaller, manageable lists.
+- **Dark and Light Mode:** Switch between themes, with the preference saved locally.
+- **Responsive UI:** Use the application on desktop and mobile screens.
+
+## 🛠️ Tech Stack
+
+| Area | Technologies |
 |---|---|
-| 🔐 Authentication | Register, Login, Logout with password hashing (Werkzeug) |
-| 📊 Dashboard | Live stats: Total, Completed, Pending, Overdue tasks |
-| ✅ Task CRUD | Create, Read, Update, Delete tasks with priority & deadline |
-| 🤖 AI Suggestion | Rule-based AI suggests priority + deadline from task text |
-| 👥 Team Collaboration | Create teams, invite members, assign & view shared tasks |
-| 🔔 Notifications | Overdue alerts + due-soon warnings (3-day window) |
-| 📎 File Uploads | Attach files to tasks (PNG, PDF, DOCX, ZIP…) |
-| 🔍 Search & Filter | Search by keyword; filter by priority, status, deadline |
-| 📄 Pagination | Task list paginated (8 per page) |
-| 🌙 Dark / Light Mode | Toggle with localStorage persistence |
-| 📱 Responsive | Fully mobile-friendly with collapsible sidebar |
+| Backend | Python, Flask |
+| Database | SQLite |
+| Frontend | HTML, CSS, Bootstrap 5, JavaScript |
+| Authentication | Flask sessions, Werkzeug password hashing |
+| Task Suggestions | Python-based rule and keyword matching |
+| File Handling | Flask file uploads and filename sanitization |
 
----
+## 📁 Project Structure
 
-## 🛠 Tech Stack
-
-- **Backend:** Python 3.x · Flask 3.0
-- **Database:** SQLite (via Python `sqlite3`)
-- **Frontend:** HTML5 · CSS3 · Bootstrap 5.3 · Vanilla JS
-- **Security:** Werkzeug password hashing · session management · file-type validation · parameterized SQL queries
-- **Fonts:** Syne (display) · DM Sans (body) — Google Fonts
-
----
-
-## 🗂 Folder Structure
-
-```
-project/
-├── app.py              # Flask routes & AI logic
-├── models.py           # DB init, schema, seeding
-├── database.db         # SQLite database (auto-created)
+```text
+TaskFlow-AI/
+├── app.py
+├── models.py
 ├── requirements.txt
+├── database.db           # Created locally
 ├── templates/
 │   ├── base.html
 │   ├── login.html
@@ -59,28 +50,46 @@ project/
 │   ├── team_tasks.html
 │   └── notifications.html
 ├── static/
-│   ├── css/style.css
-│   ├── js/script.js
-│   └── uploads/        # User file attachments
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── script.js
+│   └── uploads/
 └── README.md
 ```
 
----
+## 🚀 Getting Started
 
-## 🚀 Installation & Running Locally
+### Prerequisites
 
-### 1. Clone / Download the project
+- Python 3.10 or a compatible Python 3 version
+- pip
+
+### 1. Clone the repository
 
 ```bash
-cd project
+git clone <your-repository-url>
+cd <project-folder>
 ```
 
-### 2. Create a virtual environment (recommended)
+Alternatively, download the repository and open its folder in VS Code.
+
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
-source venv/bin/activate       # macOS / Linux
-venv\Scripts\activate          # Windows
+```
+
+Activate it on Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+On macOS or Linux:
+
+```bash
+source venv/bin/activate
 ```
 
 ### 3. Install dependencies
@@ -89,71 +98,60 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 ```
 
-### 4. Run the app
+### 4. Start the application
 
 ```bash
 python app.py
 ```
 
-### 5. Open in browser
+### 5. Open it in your browser
 
+Visit:
+
+```text
+http://127.0.0.1:5000
 ```
-http://localhost:5000
-```
 
----
+The database should be initialized according to the application's database setup code.
 
-## 👤 Demo Credentials
+## 🤖 How the Suggestion System Works
 
-| Field    | Value      |
-|----------|-----------|
-| Username | `admin`    |
-| Password | `admin123` |
+TaskFlow AI includes a rule-based suggestion feature to make task creation a little easier.
 
----
+When a user enters a task description, the application checks for certain keywords and uses them to suggest a priority and deadline.
 
-## 🤖 How the AI Feature Works
+**Priority suggestions**
 
-When you type a task description in the **Create Task** form, the frontend calls `/api/suggest` (POST JSON) with the description text.
+- **High:** Words such as `urgent`, `ASAP`, `critical`, or `blocker`
+- **Low:** Words such as `someday`, `no rush`, or `optional`
+- **Medium:** The default priority when no matching keyword is found
 
-The rule-based engine scans for keywords:
+**Deadline suggestions**
 
-| Keywords detected | Suggested Priority |
-|---|---|
-| urgent, asap, critical, blocker… | 🔴 High |
-| someday, no rush, optional… | 🟢 Low |
-| (default) | 🟡 Medium |
+- `today` → Today
+- `tomorrow` → Tomorrow
+- `this week` → Within 7 days
+- `next week` → Within 14 days
+- `this month` → Within 30 days
 
-Deadline suggestions:
+The user can apply the suggestions directly to the task form.
 
-| Keyword | Suggested Deadline |
-|---|---|
-| today / due today | Today |
-| tomorrow | Tomorrow |
-| this week | +7 days |
-| next week | +14 days |
-| this month | +30 days |
+The system uses predefined rules and keyword matching rather than a trained machine learning model.
 
-Click **Apply** on the suggestion banner to auto-fill the Priority and Deadline fields.
+## 🔐 Security and Data Handling
 
----
+The application includes several basic security measures:
 
-## 🔒 Security
+- Password hashing using Werkzeug.
+- Parameterized SQL queries for database operations.
+- Filename sanitization and restrictions on supported upload extensions.
+- Session-based authentication and a configured session lifetime.
+- Login protection for restricted routes.
 
-- Passwords hashed with `werkzeug.security.generate_password_hash`
-- All DB queries use parameterized statements (SQL injection prevention)
-- File uploads restricted to allowed extensions with `werkzeug.utils.secure_filename`
-- Session timeout set to 2 hours
-- Login required decorator on all protected routes
+These measures provide a starting point for application security, although further validation and testing would be needed before deploying the application publicly.
 
----
+## 💡 What I Learned
 
-## 📄 Resume Description
+While working on TaskFlow AI, I explored how to connect a Flask backend with a database and a browser-based interface. I also worked with user authentication, task management, file uploads, and basic automation through a rule-based suggestion system.
 
-> *Developed a full-stack AI-Powered Task Management System using Python Flask, SQLite, and Bootstrap 5. Implemented session-based authentication, RESTful API endpoints, team collaboration features, file attachment support, and a rule-based NLP engine that intelligently suggests task priority and deadlines based on natural language input.*
-
----
-
-## 📝 License
-
-MIT — free to use and modify.
+The project helped me understand how different parts of a web application work together to support
